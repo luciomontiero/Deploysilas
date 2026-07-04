@@ -15,7 +15,7 @@ validate:
     - find . -type f -name '*.php' -not -path './vendor/*' -print0 | xargs -0 -r -n1 php -l
     - if [ -f composer.json ]; then composer validate --strict; fi
     - shellcheck scripts/*.sh scripts/deploysilas scripts/lib/*.sh
-    - yamllint .github/workflows/deploysilas.yml .gitlab-ci.yml
+    - yamllint -c tests/yaml-lint-config.yml .github/workflows/deploysilas.yml .gitlab-ci.yml
     - tests/permissions.sh
 
 deploy_production:

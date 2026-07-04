@@ -34,7 +34,7 @@ jobs:
         run: shellcheck scripts/*.sh scripts/deploysilas scripts/lib/*.sh
 
       - name: YAML validation
-        run: yamllint .github/workflows/deploysilas.yml .gitlab-ci.yml
+        run: yamllint -c tests/yaml-lint-config.yml .github/workflows/deploysilas.yml .gitlab-ci.yml
 
       - name: Permission validation
         run: tests/permissions.sh
