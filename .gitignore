@@ -1,0 +1,12 @@
+.env
+*.env
+!.env.example
+!config/*.env.example
+logs/*.log
+logs/*.jsonl
+.deploy/*.lock
+.deploy/runtime/
+.deploy/backups/
+.deploy/releases/
+vendor/
+node_modules/

@@ -1,0 +1,6 @@
+# Optional shell-readable configuration file.
+# Copy to .env or export the variables in CI/CD.
+
+DEPLOYSILAS_ENV=production
+DEPLOYSILAS_APP_PATH=/home/ocgtechcom/silas.ocgtech.com.br
+DEPLOYSILAS_BRANCH=main
