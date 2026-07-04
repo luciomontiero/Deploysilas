@@ -17,6 +17,8 @@ DeploySilas can run locally on the VPS or remotely through CI/CD over SSH.
 sudo ln -s "$(pwd)/scripts/deploysilas" /usr/local/bin/deploysilas
 ```
 
+If the framework is stored outside the application, keep the symlink pointing to the DeploySilas checkout. The target PHP application can stay exactly where it is.
+
 ## Configure
 
 Copy the environment example that matches your stage and fill values outside Git:
@@ -26,3 +28,7 @@ cp config/production.env.example .env
 ```
 
 Never commit `.env`.
+
+## Dashboard
+
+Serve `dashboard/index.php` behind your existing web server or an internal-only vhost. Set `DEPLOYSILAS_DASHBOARD_TOKEN` to require a token before executing actions.

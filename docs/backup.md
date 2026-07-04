@@ -7,3 +7,5 @@ Backups are compressed with gzip and rotated according to `DEPLOYSILAS_RETENTION
 ```bash
 deploysilas backup
 ```
+
+Use cron from `templates/cron` for scheduled backups and `deploysilas cleanup` for manual rotation.
