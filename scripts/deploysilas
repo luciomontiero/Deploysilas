@@ -1,0 +1,95 @@
+#!/usr/bin/env bash
+
+set -Eeuo pipefail
+
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+
+usage() {
+  cat <<'HELP'
+DeploySilas - DevOps framework for pure PHP applications
+
+Usage:
+  deploysilas <command> [options]
+
+Commands:
+  deploy [branch]         Deploy the configured branch
+  backup                  Create file and database backups
+  rollback [options]      Roll back by last deploy, commit, tag, or ref
+  status                  Show current environment and Git status
+  health                  Run health checks
+  logs [channel]          Show logs
+  version                 Write version metadata
+  cleanup                 Rotate old backups
+  migrate [command]       Run SQL migrations
+  update                  Update DeploySilas repository
+  help                    Show this help
+HELP
+}
+
+show_logs() {
+  local channel="${1:-deploy}"
+  local root log_file
+  root="$(cd "$SCRIPT_DIR/.." && pwd)"
+  log_file="$root/logs/$channel.log"
+
+  if [[ -f "$log_file" ]]; then
+    tail -n "${DEPLOYSILAS_LOG_LINES:-200}" "$log_file"
+  else
+    printf 'Log not found: %s\n' "$log_file" >&2
+    return 1
+  fi
+}
+
+update_self() {
+  local root
+  root="$(cd "$SCRIPT_DIR/.." && pwd)"
+  git -C "$root" pull --ff-only
+}
+
+main() {
+  local command="${1:-help}"
+  shift || true
+
+  case "$command" in
+    deploy)
+      "$SCRIPT_DIR/deploy.sh" "$@"
+      ;;
+    backup)
+      "$SCRIPT_DIR/backup.sh" "$@"
+      ;;
+    rollback)
+      "$SCRIPT_DIR/rollback.sh" "$@"
+      ;;
+    status)
+      "$SCRIPT_DIR/status.sh" "$@"
+      ;;
+    health)
+      "$SCRIPT_DIR/health.sh" "$@"
+      ;;
+    logs)
+      show_logs "$@"
+      ;;
+    version)
+      "$SCRIPT_DIR/version.sh" "$@"
+      ;;
+    cleanup)
+      "$SCRIPT_DIR/cleanup.sh" "$@"
+      ;;
+    migrate)
+      "$SCRIPT_DIR/migrate.sh" "$@"
+      ;;
+    update)
+      update_self
+      ;;
+    help|--help|-h)
+      usage
+      ;;
+    *)
+      printf 'Unknown command: %s\n\n' "$command" >&2
+      usage >&2
+      return 1
+      ;;
+  esac
+}
+
+main "$@"
