@@ -1,0 +1,39 @@
+stages:
+  - validate
+  - deploy
+
+variables:
+  DEPLOYSILAS_REMOTE_APP_PATH: "/home/ocgtechcom/silas.ocgtech.com.br"
+
+validate:
+  stage: validate
+  image: ubuntu:22.04
+  before_script:
+    - apt-get update
+    - DEBIAN_FRONTEND=noninteractive apt-get install -y git curl shellcheck yamllint php-cli composer
+  script:
+    - find . -type f -name '*.php' -not -path './vendor/*' -print0 | xargs -0 -r -n1 php -l
+    - if [ -f composer.json ]; then composer validate --strict; fi
+    - shellcheck scripts/*.sh scripts/deploysilas scripts/lib/*.sh
+    - yamllint .github/workflows/deploysilas.yml .gitlab-ci.yml
+    - tests/permissions.sh
+
+deploy_production:
+  stage: deploy
+  image: alpine:3.20
+  needs:
+    - validate
+  rules:
+    - if: '$CI_COMMIT_BRANCH == "main" || $CI_COMMIT_BRANCH == "master"'
+  before_script:
+    - apk add --no-cache openssh-client
+    - mkdir -p ~/.ssh
+    - printf '%s\n' "$DEPLOYSILAS_SSH_PRIVATE_KEY" > ~/.ssh/deploysilas
+    - chmod 600 ~/.ssh/deploysilas
+    - ssh-keyscan -p "${DEPLOYSILAS_SSH_PORT:-22}" "$DEPLOYSILAS_SSH_HOST" >> ~/.ssh/known_hosts
+  script:
+    - >
+      ssh -i ~/.ssh/deploysilas
+      -p "${DEPLOYSILAS_SSH_PORT:-22}"
+      "$DEPLOYSILAS_SSH_USER@$DEPLOYSILAS_SSH_HOST"
+      "cd $DEPLOYSILAS_REMOTE_APP_PATH && deploysilas deploy"
