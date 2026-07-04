@@ -1,0 +1,10 @@
+[Unit]
+Description=DeploySilas health check
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=oneshot
+User=deploy
+WorkingDirectory=/home/ocgtechcom/silas.ocgtech.com.br
+ExecStart=/usr/local/bin/deploysilas health
